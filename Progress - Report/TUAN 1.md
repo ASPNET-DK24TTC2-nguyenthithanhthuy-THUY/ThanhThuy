@@ -13,8 +13,8 @@
 ## Lựa chọn và Xác định đề tài: “ Xây dựng Website bán giày”.
 ## Tạo GitHub Repository với cú pháp APSNET-DK24TTC2-nguyenthithanhthuy-THUYNTT
 ## Mời giảng viên hướng dẫn ( antonio86doan@gmail.com ) làm Collaborator trong repository.
-## soạn thảo file README.md giới thiệu mục tiêu và kế hoạch thực hiện đề tài.
+## Soạn thảo file README.md giới thiệu mục tiêu và kế hoạch thực hiện đề tài.
 ## Tạo các thư mục chính các tuần.
-## thesis: Chứa tài liệu báo cáo.
-## progress-report: Báo cáo tiến độ từng tuần
+## Thesis: Chứa tài liệu báo cáo.
+## Progress-report: Báo cáo tiến độ từng tuần
 
