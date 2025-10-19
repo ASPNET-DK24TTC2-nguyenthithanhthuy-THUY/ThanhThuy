@@ -1,4 +1,5 @@
-# ASPNET-DK24TTC2-nguyenthithanhthuy-Xay dung he thong ban giày
+# ASPNET-DK24TTC2-nguyenthithanhthuy-xaydungwebsite bangiay
+
 ## Giới thiệu
 ## Dự án này là Xây dựng hệ thống bán giày được phát triển bằng ASP.NET
 ## Cấu trúc thư mục
@@ -17,4 +18,5 @@
 **Lớp: DK24TTC2
 **Mã sinh viên: 170124102
 **Email: thuyntt180788@tvu-onschool.edu.vn
+
 
