@@ -12,11 +12,11 @@
   - pdf/: file. PDF
   - html/:file web
   - abs/: (.PPT, AVI,...)
--**soft/**: phần mềm liên quan
--**docker/**: cấu hình triển khai trên docker
-**Sinh viên thực hiện: **Nguyễn Thị Thanh Thủy  
-**Lớp: DK24TTC2
-**Mã sinh viên: 170124102
-**Email: thuyntt180788@tvu-onschool.edu.vn
+- soft/: phần mềm liên quan
+- docker/: cấu hình triển khai trên docker
+** Sinh viên thực hiện: Nguyễn Thị Thanh Thủy  
+** Lớp: DK24TTC2
+** Mã sinh viên: 170124102
+** Email: thuyntt180788@tvu-onschool.edu.vn
 
 
