@@ -1,12 +1,12 @@
 ## BÁO CÁO TIẾN ĐỘ THỰC HIỆN ĐỀ TÀI TUẦN 1
 ## Môn học: Chuyên đề ASP.NET
-## Tuần 1 (12/10 – 19/10/2025): Khảo sát & xác định đề tài
-## Sinh viên thực hiện: **Nguyễn Thị Thanh Thủy  
+## Tuần 1 (12/10 – 19/10/2025): Khảo sát & xác định đề tài.
+## Sinh viên thực hiện: Nguyễn Thị Thanh Thủy.  
 ## Lớp: DK24TTC2
 ## Mã sinh viên: 170124102
 ## Email: thuyntt180788@tvu-onschool.edu.vn
 # Đề tài: Xây dựng website bán giày
-## Giảng viên hướng dẫn: **ThS. Đoàn Phước Miền
+## Giảng viên hướng dẫn: ThS. Đoàn Phước Miền
 ---
 ## Tuần 1 (12/10 – 19/10/2025): Nội dung công việc đã thực hiện:
 ## Tìm hiểu yêu cầu môn học, nhu cầu thực tế về thương mại điện tử trong lĩnh vực giày dép và các hướng dẫn từ giảng viên, QLHT, tài liệu trên LMS.
