@@ -9,9 +9,10 @@
 **Giảng viên hướng dẫn: **ThS. Đoàn Phước Miền
 ---
 
-Tuần 2 (20/10/2025 - 26/10/2025): Thu thập yêu cầu & mô tả nghiệp vụ
-•	Khảo sát nghiệp vụ của cửa hàng bán giày (quản lý sản phẩm, đơn hàng, người dùng).
-•	Xác định các tác nhân (Admin, Nhân viên, Khách hàng).
-•	Viết tài liệu mô tả yêu cầu chức năng và phi chức năng.
-•	Kết quả: Hoàn thành mô tả nghiệp vụ và danh sách yêu cầu chức năng.
-________________________________________
+# Tuần 2 (20/10/2025 - 26/10/2025): Thu thập yêu cầu & mô tả nghiệp vụ
+*	Khảo sát nghiệp vụ của cửa hàng bán giày (quản lý sản phẩm, đơn hàng, người dùng).
+*	Xác định các tác nhân (Admin, Nhân viên, Khách hàng).
+*	Viết tài liệu mô tả yêu cầu chức năng và phi chức năng.
+*	Kết quả: Hoàn thành mô tả nghiệp vụ và danh sách yêu cầu chức năng.
+
+---
