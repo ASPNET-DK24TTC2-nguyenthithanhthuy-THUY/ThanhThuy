@@ -1,6 +1,6 @@
 ## BÁO CÁO TIẾN ĐỘ THỰC HIỆN ĐỀ TÀI TUẦN 2
 ## Môn học: Chuyên đề ASP.NET
-## Tuần 1 (20/10 – 26/10/2025):Thu thập yêu cầu & mô tả nghiệp vụ.
+## Tuần 2 (20/10/2025 - 26/10/2025): Thu thập yêu cầu & mô tả nghiệp vụ.
 ## Sinh viên thực hiện: Nguyễn Thị Thanh Thủy.  
 ## Lớp: DK24TTC2
 ## Mã sinh viên: 170124102
