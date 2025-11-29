@@ -1,0 +1,67 @@
+@model List<ShoeStore.Models.WishlistItem>
+
+@{
+    ViewData["Title"] = "Danh sách yêu thích";
+}
+
+<div class="container py-5">
+    <h2 class="mb-4"><i class="fas fa-heart text-danger me-2"></i>Danh sách yêu thích</h2>
+
+    @if (Model.Any())
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 border-0 shadow-sm product-card">
+                        <div class="position-relative">
+                            <img src="@(item.Product.MainImageUrl ?? "https://via.placeholder.com/300")" class="card-img-top" alt="@item.Product.Name" style="height: 250px; object-fit: cover;">
+                            <form asp-action="Remove" method="post" class="position-absolute top-0 end-0 m-2">
+                                <input type="hidden" name="productId" value="@item.ProductId" />
+                                <button type="submit" class="btn btn-light btn-sm rounded-circle shadow-sm text-danger" title="Xóa khỏi yêu thích">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate">
+                                <a asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId" class="text-decoration-none text-dark">
+                                    @item.Product.Name
+                                </a>
+                            </h5>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div>
+                                    @if (item.Product.SalePrice.HasValue && item.Product.SalePrice < item.Product.Price)
+                                    {
+                                        <span class="text-danger fw-bold">@item.Product.SalePrice.Value.ToString("N0")đ</span>
+                                        <small class="text-muted text-decoration-line-through ms-1">@item.Product.Price.ToString("N0")đ</small>
+                                    }
+                                    else
+                                    {
+                                        <span class="fw-bold">@item.Product.Price.ToString("N0")đ</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-top-0">
+                            <a asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId" class="btn btn-primary w-100">
+                                <i class="fas fa-shopping-cart me-2"></i>Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="far fa-heart fa-4x text-muted mb-3"></i>
+            <h4>Danh sách yêu thích trống</h4>
+            <p class="text-muted">Hãy thêm những sản phẩm bạn yêu thích vào đây nhé!</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-3">
+                <i class="fas fa-shopping-bag me-2"></i>Tiếp tục mua sắm
+            </a>
+        </div>
+    }
+</div>

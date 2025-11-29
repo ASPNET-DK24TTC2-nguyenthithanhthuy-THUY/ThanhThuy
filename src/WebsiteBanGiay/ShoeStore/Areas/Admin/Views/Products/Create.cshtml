@@ -1,0 +1,301 @@
+@model ShoeStore.Models.Product
+
+@{
+    ViewData["Title"] = "Thêm sản phẩm mới";
+    var categories = ViewBag.Categories as List<ShoeStore.Models.Category> ?? new List<ShoeStore.Models.Category>();
+    var brands = ViewBag.Brands as List<ShoeStore.Models.Brand> ?? new List<ShoeStore.Models.Brand>();
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-plus-circle me-2"></i>Thêm sản phẩm mới</h2>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row g-3">
+                    <!-- Basic Info -->
+                    <div class="col-md-8">
+                        <div class="card h-100 border-light bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Thông tin cơ bản</h5>
+                                
+                                <div class="mb-3">
+                                    <label asp-for="Name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+                                    <input asp-for="Name" class="form-control" placeholder="Nhập tên sản phẩm" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="ProductCode" class="form-label">Mã sản phẩm <span class="text-danger">*</span></label>
+                                        <input asp-for="ProductCode" class="form-control" placeholder="VD: SP001" />
+                                        <span asp-validation-for="ProductCode" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="Price" class="form-label">Giá bán <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input asp-for="Price" class="form-control" type="number" />
+                                            <span class="input-group-text">VNĐ</span>
+                                        </div>
+                                        <span asp-validation-for="Price" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="CategoryId" class="form-label">Danh mục <span class="text-danger">*</span></label>
+                                        <select asp-for="CategoryId" class="form-select" asp-items="@(new SelectList(categories, "CategoryId", "Name"))">
+                                            <option value="">-- Chọn danh mục --</option>
+                                        </select>
+                                        <span asp-validation-for="CategoryId" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="BrandId" class="form-label">Thương hiệu <span class="text-danger">*</span></label>
+                                        <select asp-for="BrandId" class="form-select" asp-items="@(new SelectList(brands, "BrandId", "Name"))">
+                                            <option value="">-- Chọn thương hiệu --</option>
+                                        </select>
+                                        <span asp-validation-for="BrandId" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Description" class="form-label">Mô tả <span class="text-danger">*</span></label>
+                                    <textarea asp-for="Description" class="form-control" rows="5" placeholder="Mô tả chi tiết sản phẩm"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings & Image -->
+                    <div class="col-md-4">
+                        <div class="card mb-3 border-light bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Cài đặt & Hình ảnh</h5>
+
+                                <div class="mb-3">
+                                    <label asp-for="DiscountPercent" class="form-label">Giảm giá (%)</label>
+                                    <input asp-for="DiscountPercent" class="form-control" type="number" min="0" max="100" />
+                                    <span asp-validation-for="DiscountPercent" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Hình ảnh chính</label>
+                                    <input type="file" name="mainImage" class="form-control" accept="image/*" onchange="previewImage(this)" />
+                                    <div class="mt-2 text-center">
+                                        <img id="imagePreview" src="#" alt="Preview" style="max-width: 100%; max-height: 200px; display: none; border-radius: 8px;" />
+                                    </div>
+                                </div>
+
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" asp-for="IsActive" checked>
+                                    <label class="form-check-label" asp-for="IsActive">Kích hoạt</label>
+                                </div>
+
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" asp-for="IsFeatured">
+                                    <label class="form-check-label" asp-for="IsFeatured">Nổi bật</label>
+                                </div>
+
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" asp-for="IsBestSeller">
+                                    <label class="form-check-label" asp-for="IsBestSeller">Bán chạy</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sizes & Colors -->
+                <div class="row g-3 mt-3">
+                    <div class="col-md-6">
+                        <div class="card h-100 border-light bg-light">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="card-title mb-0">Kích thước & Số lượng</h5>
+                                    <button type="button" class="btn btn-sm btn-success" onclick="addSizeRow()">
+                                        <i class="fas fa-plus"></i> Thêm
+                                    </button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered bg-white" id="sizesTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Size</th>
+                                                <th>Số lượng</th>
+                                                <th style="width: 50px;"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model?.ProductSizes != null)
+                                            {
+                                                var sizes = Model.ProductSizes.ToList();
+                                                for (int i = 0; i < sizes.Count; i++)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <input name="ProductSizes[@i].Size" class="form-control form-control-sm" value="@sizes[i].Size" required />
+                                                        </td>
+                                                        <td>
+                                                            <input name="ProductSizes[@i].StockQuantity" type="number" class="form-control form-control-sm" value="@sizes[i].StockQuantity" min="0" required />
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card h-100 border-light bg-light">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="card-title mb-0">Màu sắc</h5>
+                                    <button type="button" class="btn btn-sm btn-success" onclick="addColorRow()">
+                                        <i class="fas fa-plus"></i> Thêm
+                                    </button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered bg-white" id="colorsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Tên màu</th>
+                                                <th>Mã màu</th>
+                                                <th style="width: 50px;"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model?.ProductColors != null)
+                                            {
+                                                var colors = Model.ProductColors.ToList();
+                                                for (int i = 0; i < colors.Count; i++)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <input name="ProductColors[@i].ColorName" class="form-control form-control-sm" value="@colors[i].ColorName" required />
+                                                        </td>
+                                                        <td>
+                                                            <input name="ProductColors[@i].ColorCode" type="color" class="form-control form-control-sm form-control-color" value="@(colors[i].ColorCode ?? "#000000")" title="Chọn màu" />
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save me-2"></i>Tạo sản phẩm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var preview = document.getElementById('imagePreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        let sizeIndex = @(Model?.ProductSizes?.Count ?? 0);
+        let colorIndex = @(Model?.ProductColors?.Count ?? 0);
+
+        function addSizeRow() {
+            const table = document.getElementById('sizesTable').getElementsByTagName('tbody')[0];
+            const row = table.insertRow();
+            row.innerHTML = `
+                <td>
+                    <input name="ProductSizes[${sizeIndex}].Size" class="form-control form-control-sm" placeholder="Size" required />
+                </td>
+                <td>
+                    <input name="ProductSizes[${sizeIndex}].StockQuantity" type="number" class="form-control form-control-sm" value="0" min="0" required />
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            sizeIndex++;
+        }
+
+        function addColorRow() {
+            const table = document.getElementById('colorsTable').getElementsByTagName('tbody')[0];
+            const row = table.insertRow();
+            row.innerHTML = `
+                <td>
+                    <input name="ProductColors[${colorIndex}].ColorName" class="form-control form-control-sm" placeholder="Tên màu" required />
+                </td>
+                <td>
+                    <input name="ProductColors[${colorIndex}].ColorCode" type="color" class="form-control form-control-sm form-control-color" value="#000000" title="Chọn màu" />
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            colorIndex++;
+        }
+
+        function removeRow(btn) {
+            const row = btn.closest('tr');
+            row.remove();
+            reindexRows();
+        }
+
+        function reindexRows() {
+            // Re-index Sizes
+            const sizeRows = document.querySelectorAll('#sizesTable tbody tr');
+            sizeRows.forEach((row, index) => {
+                row.querySelector('input[name*="Size"]').name = `ProductSizes[${index}].Size`;
+                row.querySelector('input[name*="StockQuantity"]').name = `ProductSizes[${index}].StockQuantity`;
+            });
+            sizeIndex = sizeRows.length;
+
+            // Re-index Colors
+            const colorRows = document.querySelectorAll('#colorsTable tbody tr');
+            colorRows.forEach((row, index) => {
+                row.querySelector('input[name*="ColorName"]').name = `ProductColors[${index}].ColorName`;
+                row.querySelector('input[name*="ColorCode"]').name = `ProductColors[${index}].ColorCode`;
+            });
+            colorIndex = colorRows.length;
+        }
+    </script>
+}

@@ -1,0 +1,357 @@
+@model ShoeStore.Models.Product
+@{
+    ViewData["Title"] = Model.Name;
+    var relatedProducts = ViewBag.RelatedProducts as List<ShoeStore.Models.Product> ?? new List<ShoeStore.Models.Product>();
+}
+
+@section Styles {
+    <style>
+        .product-detail-image {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            border-radius: 1rem;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .price-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .size-option {
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .size-option:hover {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        .size-option.selected {
+            border-color: #2563eb;
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .color-option:hover {
+            border-color: #2563eb;
+            transform: scale(1.1);
+        }
+
+        .color-option.selected {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .review-card {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .star-rating {
+            color: #fbbf24;
+        }
+    </style>
+}
+
+<div class="container my-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Products" asp-action="Index">Sản phẩm</a></li>
+            <li class="breadcrumb-item active">@Model.Name</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Product Images -->
+        <div class="col-lg-6">
+            <img src="@(Model.MainImageUrl ?? "https://via.placeholder.com/500x500?text=Shoe+Image")" 
+                 alt="@Model.Name" 
+                 class="product-detail-image mb-3">
+            
+            @if (Model.ProductImages.Any())
+            {
+                <div class="row g-2">
+                    @foreach (var image in Model.ProductImages.Take(4))
+                    {
+                        <div class="col-3">
+                            <img src="@image.ImageUrl" alt="@Model.Name" 
+                                 class="img-fluid rounded" style="height: 100px; object-fit: cover; width: 100%;">
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Product Info -->
+        <div class="col-lg-6">
+            <div class="mb-3">
+                <span class="badge bg-primary me-2">@Model.Category.Name</span>
+                <span class="badge bg-secondary">@Model.Brand.Name</span>
+                @if (Model.IsFeatured)
+                {
+                    <span class="badge bg-warning text-dark">Nổi bật</span>
+                }
+                @if (Model.IsBestSeller)
+                {
+                    <span class="badge bg-danger">Bán chạy</span>
+                }
+            </div>
+
+            <h1 class="display-5 fw-bold mb-3">@Model.Name</h1>
+            <p class="text-muted mb-4">Mã sản phẩm: <strong>@Model.ProductCode</strong></p>
+
+            <!-- Price Section -->
+            <div class="price-section">
+                @if (Model.SalePrice.HasValue && Model.SalePrice < Model.Price)
+                {
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="h2 mb-0 fw-bold">@Model.SalePrice.Value.ToString("N0")đ</div>
+                            <div class="text-decoration-line-through opacity-75">@Model.Price.ToString("N0")đ</div>
+                        </div>
+                        <div class="badge bg-danger" style="font-size: 1.5rem; padding: 1rem;">
+                            -@Model.DiscountPercent%
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="h2 mb-0 fw-bold">@Model.Price.ToString("N0")đ</div>
+                }
+            </div>
+
+            <!-- Description -->
+            <div class="info-card">
+                <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>Mô tả sản phẩm</h5>
+                <p class="text-muted">@Model.Description</p>
+            </div>
+
+            <!-- Sizes -->
+            @if (Model.ProductSizes.Any())
+            {
+                <div class="info-card">
+                    <h5 class="mb-3"><i class="fas fa-ruler me-2"></i>Chọn kích cỡ</h5>
+                    <div class="row g-2">
+                        @foreach (var size in Model.ProductSizes.Where(s => s.IsAvailable))
+                        {
+                            <div class="col-auto">
+                                <div class="size-option">
+                                    <strong>@size.Size</strong>
+                                    <div class="small text-muted">SL: @size.StockQuantity</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Colors -->
+            @if (Model.ProductColors.Any())
+            {
+                <div class="info-card">
+                    <h5 class="mb-3"><i class="fas fa-palette me-2"></i>Chọn màu sắc</h5>
+                    <div class="d-flex gap-2">
+                        @foreach (var color in Model.ProductColors.Where(c => c.IsAvailable))
+                        {
+                            <div class="color-option" 
+                                 style="background-color: @(color.ColorCode ?? "#ccc")"
+                                 title="@color.ColorName">
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Actions -->
+            <form asp-controller="Cart" asp-action="AddToCart" method="post" id="addToCartForm">
+                <input type="hidden" name="productId" value="@Model.ProductId" />
+                <input type="hidden" name="size" id="selectedSize" />
+                <input type="hidden" name="color" id="selectedColor" />
+                <input type="hidden" name="quantity" value="1" />
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-shopping-cart me-2"></i>Thêm vào giỏ hàng
+                    </button>
+                    @{
+                        bool isWishlisted = ViewBag.IsWishlisted ?? false;
+                    }
+                    <button type="button" class="btn @(isWishlisted ? "btn-danger text-white" : "btn-outline-danger") btn-lg wishlist-btn" data-product-id="@Model.ProductId">
+                        <i class="@(isWishlisted ? "fas" : "far") fa-heart me-2"></i>@(isWishlisted ? "Đã yêu thích" : "Yêu thích")
+                    </button>
+                </div>
+            </form>
+
+            <!-- Features -->
+            <div class="info-card mt-4">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <i class="fas fa-shipping-fast fa-2x text-primary mb-2"></i>
+                        <p class="small mb-0">Giao hàng nhanh</p>
+                    </div>
+                    <div class="col-4">
+                        <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                        <p class="small mb-0">Hàng chính hãng</p>
+                    </div>
+                    <div class="col-4">
+                        <i class="fas fa-sync-alt fa-2x text-warning mb-2"></i>
+                        <p class="small mb-0">Đổi trả 30 ngày</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="info-card">
+                <h4 class="mb-4"><i class="fas fa-star text-warning me-2"></i>Đánh giá sản phẩm</h4>
+                
+                @if (Model.Reviews.Any(r => r.IsApproved))
+                {
+                    @foreach (var review in Model.Reviews.Where(r => r.IsApproved).OrderByDescending(r => r.CreatedAt))
+                    {
+                        <div class="review-card">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <strong>@review.User.FullName</strong>
+                                    <div class="star-rating">
+                                        @for (int i = 0; i < review.Rating; i++)
+                                        {
+                                            <i class="fas fa-star"></i>
+                                        }
+                                        @for (int i = review.Rating; i < 5; i++)
+                                        {
+                                            <i class="far fa-star"></i>
+                                        }
+                                    </div>
+                                </div>
+                                <small class="text-muted">@review.CreatedAt.ToString("dd/MM/yyyy")</small>
+                            </div>
+                            <p class="mb-0">@review.Comment</p>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted text-center py-4">Chưa có đánh giá nào cho sản phẩm này</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    @if (relatedProducts.Any())
+    {
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3 class="mb-4">Sản phẩm liên quan</h3>
+                <div class="row g-4">
+                    @foreach (var product in relatedProducts)
+                    {
+                        <div class="col-lg-3 col-md-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <img src="@(product.MainImageUrl ?? "https://via.placeholder.com/300x250")" 
+                                     class="card-img-top" alt="@product.Name" 
+                                     style="height: 200px; object-fit: cover;">
+                                <div class="card-body">
+                                    <h6 class="card-title">@product.Name</h6>
+                                    <p class="text-primary fw-bold">@product.Price.ToString("N0")đ</p>
+                                    <a asp-action="Details" asp-route-id="@product.ProductId" 
+                                       class="btn btn-sm btn-outline-primary w-100">
+                                        Xem chi tiết
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Size selection
+        document.querySelectorAll('.size-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.size-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                document.getElementById('selectedSize').value = this.querySelector('strong').textContent;
+            });
+        });
+
+        // Color selection
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                document.getElementById('selectedColor').value = this.getAttribute('title');
+            });
+        });
+
+        // Wishlist functionality
+        $(document).ready(function () {
+            $('.wishlist-btn').click(function (e) {
+                e.preventDefault();
+                var btn = $(this);
+                var productId = btn.data('product-id');
+                var icon = btn.find('i');
+
+                $.post('/Wishlist/Toggle', { productId: productId }, function (response) {
+                    if (response.success) {
+                        if (response.isAdded) {
+                            icon.removeClass('far').addClass('fas');
+                            btn.html('<i class="fas fa-heart me-2"></i>Đã yêu thích');
+                            btn.removeClass('btn-outline-danger').addClass('btn-danger text-white');
+                        } else {
+                            icon.removeClass('fas').addClass('far');
+                            btn.html('<i class="far fa-heart me-2"></i>Yêu thích');
+                            btn.removeClass('btn-danger text-white').addClass('btn-outline-danger');
+                        }
+                    } else {
+                        alert(response.message);
+                        if (response.message.includes("đăng nhập")) {
+                            window.location.href = '/Account/Login';
+                        }
+                    }
+                }).fail(function () {
+                    alert('Có lỗi xảy ra, vui lòng thử lại sau.');
+                });
+            });
+        });
+    </script>
+}

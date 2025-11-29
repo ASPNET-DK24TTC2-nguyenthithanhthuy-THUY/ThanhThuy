@@ -1,0 +1,205 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    var recentOrders = ViewBag.RecentOrders as List<ShoeStore.Models.Order> ?? new List<ShoeStore.Models.Order>();
+    var lowStockProducts = ViewBag.LowStockProducts as List<ShoeStore.Models.Product> ?? new List<ShoeStore.Models.Product>();
+}
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card primary">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted mb-1">Tổng sản phẩm</p>
+                    <h3 class="mb-0">@ViewBag.TotalProducts</h3>
+                </div>
+                <div class="stat-icon primary">
+                    <i class="fas fa-box"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-card success">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted mb-1">Tổng đơn hàng</p>
+                    <h3 class="mb-0">@ViewBag.TotalOrders</h3>
+                </div>
+                <div class="stat-icon success">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-card warning">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted mb-1">Khách hàng</p>
+                    <h3 class="mb-0">@ViewBag.TotalCustomers</h3>
+                </div>
+                <div class="stat-icon warning">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-card danger">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted mb-1">Doanh thu</p>
+                    <h3 class="mb-0">@(((decimal)ViewBag.TotalRevenue).ToString("N0"))đ</h3>
+                </div>
+                <div class="stat-icon danger">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-4 mb-4">
+    <div class="col-md-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3"><i class="fas fa-bolt me-2 text-primary"></i>Thao tác nhanh</h5>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a asp-area="Admin" asp-controller="Products" asp-action="Create" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Thêm sản phẩm
+                    </a>
+                    <a asp-area="Admin" asp-controller="Orders" asp-action="Index" class="btn btn-success">
+                        <i class="fas fa-list me-2"></i>Xem đơn hàng
+                    </a>
+                    <a asp-area="Admin" asp-controller="Customers" asp-action="Index" class="btn btn-info text-white">
+                        <i class="fas fa-users me-2"></i>Quản lý khách hàng
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Recent Orders -->
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0"><i class="fas fa-shopping-bag me-2 text-success"></i>Đơn hàng gần đây</h5>
+                    <a asp-area="Admin" asp-controller="Orders" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                        Xem tất cả
+                    </a>
+                </div>
+
+                @if (recentOrders.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Mã ĐH</th>
+                                    <th>Khách hàng</th>
+                                    <th>Ngày đặt</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var order in recentOrders)
+                                {
+                                    <tr>
+                                        <td><strong>#@order.OrderId</strong></td>
+                                        <td>@order.User.FullName</td>
+                                        <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                                        <td>@order.TotalAmount.ToString("N0")đ</td>
+                                        <td>
+                                            @switch (order.Status)
+                                            {
+                                                case OrderStatus.Pending:
+                                                    <span class="badge bg-warning">Chờ xử lý</span>
+                                                    break;
+                                                case OrderStatus.Confirmed:
+                                                    <span class="badge bg-info">Đã xác nhận</span>
+                                                    break;
+                                                case OrderStatus.Processing:
+                                                    <span class="badge bg-primary">Đang xử lý</span>
+                                                    break;
+                                                case OrderStatus.Shipping:
+                                                    <span class="badge bg-secondary">Đang giao</span>
+                                                    break;
+                                                case OrderStatus.Delivered:
+                                                    <span class="badge bg-success">Đã giao</span>
+                                                    break;
+                                                case OrderStatus.Cancelled:
+                                                    <span class="badge bg-danger">Đã hủy</span>
+                                                    break;
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted text-center py-4">Chưa có đơn hàng nào</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts & Notifications -->
+    <div class="col-md-4">
+        <!-- Pending Orders Alert -->
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <h6 class="card-title"><i class="fas fa-bell me-2 text-warning"></i>Thông báo</h6>
+                <div class="alert alert-warning mb-0">
+                    <strong>@ViewBag.PendingOrders</strong> đơn hàng chờ xử lý
+                    <a asp-area="Admin" asp-controller="Orders" asp-action="Index" class="alert-link d-block mt-2">
+                        Xem ngay →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Products -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title"><i class="fas fa-exclamation-triangle me-2 text-danger"></i>Sản phẩm sắp hết</h6>
+                
+                @if (lowStockProducts.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var product in lowStockProducts)
+                        {
+                            <div class="list-group-item px-0">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>@product.Name</strong>
+                                        <br />
+                                        <small class="text-muted">
+                                            Còn: @product.ProductSizes.Sum(s => s.StockQuantity) sản phẩm
+                                        </small>
+                                    </div>
+                                    <span class="badge bg-danger">!</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted small mb-0">Tất cả sản phẩm đều đủ hàng</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

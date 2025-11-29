@@ -1,0 +1,294 @@
+@model ShoeStore.Models.Order
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng #" + Model.OrderId;
+}
+
+@section Styles {
+    <style>
+        .order-detail-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .status-timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .status-timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e5e7eb;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2rem;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -1.5rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background: #e5e7eb;
+        }
+
+        .timeline-dot.active {
+            background: #10b981;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+        }
+    </style>
+}
+
+<div class="container my-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">Đơn hàng</a></li>
+            <li class="breadcrumb-item active">Chi tiết #@Model.OrderId</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-receipt me-2"></i>Đơn hàng #@Model.OrderId</h1>
+        @if (Model.Status == OrderStatus.Pending || Model.Status == OrderStatus.Confirmed)
+        {
+            <form asp-action="Cancel" method="post" class="d-inline">
+                <input type="hidden" name="id" value="@Model.OrderId" />
+                <button type="submit" class="btn btn-danger" 
+                        onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này?')">
+                    <i class="fas fa-times me-2"></i>Hủy đơn hàng
+                </button>
+            </form>
+        }
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Order Info -->
+        <div class="col-lg-8">
+            <!-- Order Status -->
+            <div class="order-detail-card">
+                <h4 class="mb-4"><i class="fas fa-info-circle me-2"></i>Trạng thái đơn hàng</h4>
+                
+                <div class="status-timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot @(Model.Status >= OrderStatus.Pending ? "active" : "")"></div>
+                        <strong>Đơn hàng đã đặt</strong>
+                        <p class="text-muted small mb-0">@Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot @(Model.Status >= OrderStatus.Confirmed ? "active" : "")"></div>
+                        <strong>Đã xác nhận</strong>
+                        <p class="text-muted small mb-0">
+                            @(Model.Status >= OrderStatus.Confirmed ? "Đơn hàng đã được xác nhận" : "Chờ xác nhận")
+                        </p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot @(Model.Status >= OrderStatus.Processing ? "active" : "")"></div>
+                        <strong>Đang xử lý</strong>
+                        <p class="text-muted small mb-0">
+                            @(Model.Status >= OrderStatus.Processing ? "Đang chuẩn bị hàng" : "Chờ xử lý")
+                        </p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot @(Model.Status >= OrderStatus.Shipping ? "active" : "")"></div>
+                        <strong>Đang giao hàng</strong>
+                        <p class="text-muted small mb-0">
+                            @(Model.Status >= OrderStatus.Shipping ? "Đơn hàng đang được giao" : "Chờ giao hàng")
+                        </p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot @(Model.Status >= OrderStatus.Delivered ? "active" : "")"></div>
+                        <strong>Đã giao hàng</strong>
+                        <p class="text-muted small mb-0">
+                            @(Model.Status >= OrderStatus.Delivered ? "Giao hàng thành công" : "Chờ giao hàng")
+                        </p>
+                    </div>
+                </div>
+
+                @if (Model.Status == OrderStatus.Cancelled)
+                {
+                    <div class="alert alert-danger mt-3">
+                        <i class="fas fa-times-circle me-2"></i>
+                        <strong>Đơn hàng đã bị hủy</strong>
+                    </div>
+                }
+            </div>
+
+            <!-- Order Items -->
+            <div class="order-detail-card">
+                <h4 class="mb-4"><i class="fas fa-box me-2"></i>Sản phẩm</h4>
+                
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Số lượng</th>
+                                <th>Đơn giá</th>
+                                <th class="text-end">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OrderDetails)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@item.ProductName</strong>
+                                        @if (!string.IsNullOrEmpty(item.Size) || !string.IsNullOrEmpty(item.Color))
+                                        {
+                                            <br />
+                                            <small class="text-muted">
+                                                @if (!string.IsNullOrEmpty(item.Size))
+                                                {
+                                                    <span>Size: @item.Size</span>
+                                                }
+                                                @if (!string.IsNullOrEmpty(item.Color))
+                                                {
+                                                    <span class="ms-2">Màu: @item.Color</span>
+                                                }
+                                            </small>
+                                        }
+                                    </td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.UnitPrice.ToString("N0")đ</td>
+                                    <td class="text-end">@item.TotalPrice.ToString("N0")đ</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Tạm tính:</strong></td>
+                                <td class="text-end">@Model.SubTotal.ToString("N0")đ</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Phí vận chuyển:</strong></td>
+                                <td class="text-end">@Model.ShippingFee.ToString("N0")đ</td>
+                            </tr>
+                            @if (Model.DiscountAmount > 0)
+                            {
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Giảm giá:</strong></td>
+                                    <td class="text-end text-danger">-@Model.DiscountAmount.ToString("N0")đ</td>
+                                </tr>
+                            }
+                            <tr class="table-primary">
+                                <td colspan="3" class="text-end"><h5 class="mb-0">Tổng cộng:</h5></td>
+                                <td class="text-end"><h5 class="mb-0 text-primary">@Model.TotalAmount.ToString("N0")đ</h5></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Customer Info -->
+            <div class="order-detail-card">
+                <h5 class="mb-3"><i class="fas fa-user me-2"></i>Thông tin người nhận</h5>
+                <p class="mb-2"><strong>Họ tên:</strong> @Model.CustomerName</p>
+                <p class="mb-2"><strong>Email:</strong> @Model.CustomerEmail</p>
+                <p class="mb-2"><strong>SĐT:</strong> @Model.CustomerPhone</p>
+                <p class="mb-2"><strong>Địa chỉ:</strong> @Model.ShippingAddress</p>
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <hr>
+                    <p class="mb-2"><strong>Ghi chú:</strong></p>
+                    <p class="text-muted">@Model.Notes</p>
+                }
+            </div>
+
+            <!-- Payment Info -->
+            <div class="order-detail-card">
+                <h5 class="mb-3"><i class="fas fa-credit-card me-2"></i>Thanh toán</h5>
+                <p class="mb-2">
+                    <strong>Phương thức:</strong>
+                    @switch (Model.PaymentMethod)
+                    {
+                        case PaymentMethod.COD:
+                            <span class="badge bg-success">COD</span>
+                            break;
+                        case PaymentMethod.BankTransfer:
+                            <span class="badge bg-primary">Chuyển khoản</span>
+                            break;
+                        case PaymentMethod.CreditCard:
+                            <span class="badge bg-info">Thẻ tín dụng</span>
+                            break;
+                    }
+                </p>
+                <p class="mb-2">
+                    <strong>Trạng thái:</strong>
+                    @if (Model.IsPaid)
+                    {
+                        <span class="badge bg-success">Đã thanh toán</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning">Chưa thanh toán</span>
+                    }
+                </p>
+            </div>
+
+            <!-- Shipping Info -->
+            <div class="order-detail-card">
+                <h5 class="mb-3"><i class="fas fa-truck me-2"></i>Vận chuyển</h5>
+                <p class="mb-2">
+                    <strong>Phương thức:</strong>
+                    @switch (Model.ShippingMethod)
+                    {
+                        case ShippingMethod.Standard:
+                            <text>Tiêu chuẩn (3-5 ngày)</text>
+                            break;
+                        case ShippingMethod.Express:
+                            <text>Nhanh (1-2 ngày)</text>
+                            break;
+                        case ShippingMethod.SuperExpress:
+                            <text>Siêu tốc (trong ngày)</text>
+                            break;
+                    }
+                </p>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-grid gap-2">
+                <a asp-action="Index" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
+                </a>
+                <a asp-controller="Home" asp-action="Contact" class="btn btn-outline-secondary">
+                    <i class="fas fa-headset me-2"></i>Liên hệ hỗ trợ
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

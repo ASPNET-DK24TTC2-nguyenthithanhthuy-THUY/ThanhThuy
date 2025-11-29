@@ -1,0 +1,177 @@
+@model List<ShoeStore.Models.Product>
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    var categories = ViewBag.Categories as List<ShoeStore.Models.Category> ?? new List<ShoeStore.Models.Category>();
+    var brands = ViewBag.Brands as List<ShoeStore.Models.Brand> ?? new List<ShoeStore.Models.Brand>();
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+}
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-box me-2"></i>Quản lý sản phẩm</h2>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Thêm sản phẩm mới
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Filters -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Tìm theo tên hoặc mã..." value="@ViewBag.Search">
+            </div>
+            <div class="col-md-3">
+                <select name="categoryId" class="form-select">
+                    <option value="">Tất cả danh mục</option>
+                    @foreach (var cat in categories)
+                    {
+                        <option value="@cat.CategoryId" selected="@(ViewBag.CategoryId == cat.CategoryId)">@cat.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="brandId" class="form-select">
+                    <option value="">Tất cả thương hiệu</option>
+                    @foreach (var brand in brands)
+                    {
+                        <option value="@brand.BrandId" selected="@(ViewBag.BrandId == brand.BrandId)">@brand.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-2"></i>Lọc
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Products Table -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Hình ảnh</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Mã SP</th>
+                        <th>Danh mục</th>
+                        <th>Thương hiệu</th>
+                        <th>Giá</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in Model)
+                    {
+                        <tr>
+                            <td>
+                                <img src="@(product.MainImageUrl ?? "https://via.placeholder.com/50")" 
+                                     alt="@product.Name" 
+                                     style="width: 50px; height: 50px; object-fit: cover; border-radius: 0.5rem;">
+                            </td>
+                            <td>
+                                <strong>@product.Name</strong>
+                                @if (product.IsFeatured)
+                                {
+                                    <span class="badge bg-warning text-dark ms-2">Nổi bật</span>
+                                }
+                                @if (product.IsBestSeller)
+                                {
+                                    <span class="badge bg-danger ms-2">Bán chạy</span>
+                                }
+                            </td>
+                            <td>@product.ProductCode</td>
+                            <td>@product.Category.Name</td>
+                            <td>@product.Brand.Name</td>
+                            <td>
+                                @if (product.SalePrice.HasValue && product.SalePrice < product.Price)
+                                {
+                                    <span class="text-danger fw-bold">@product.SalePrice.Value.ToString("N0")đ</span>
+                                    <br />
+                                    <small class="text-muted text-decoration-line-through">@product.Price.ToString("N0")đ</small>
+                                }
+                                else
+                                {
+                                    <span class="fw-bold">@product.Price.ToString("N0")đ</span>
+                                }
+                            </td>
+                            <td>
+                                @if (product.IsActive)
+                                {
+                                    <span class="badge bg-success">Hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Vô hiệu</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a asp-action="Details" asp-route-id="@product.ProductId" class="btn btn-info text-white" title="Chi tiết">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@product.ProductId" class="btn btn-primary" title="Sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form asp-action="ToggleActive" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@product.ProductId" />
+                                        <button type="submit" class="btn btn-@(product.IsActive ? "warning" : "success")" title="@(product.IsActive ? "Vô hiệu hóa" : "Kích hoạt")">
+                                            <i class="fas fa-@(product.IsActive ? "ban" : "check")"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages > 1)
+        {
+            <nav class="mt-3">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@(currentPage - 1)" asp-route-search="@ViewBag.Search" asp-route-categoryId="@ViewBag.CategoryId" asp-route-brandId="@ViewBag.BrandId">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-search="@ViewBag.Search" asp-route-categoryId="@ViewBag.CategoryId" asp-route-brandId="@ViewBag.BrandId">
+                                @i
+                            </a>
+                        </li>
+                    }
+
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@(currentPage + 1)" asp-route-search="@ViewBag.Search" asp-route-categoryId="@ViewBag.CategoryId" asp-route-brandId="@ViewBag.BrandId">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        }
+
+        <div class="text-center text-muted mt-3">
+            <small>Hiển thị @Model.Count trong tổng số @ViewBag.TotalItems sản phẩm</small>
+        </div>
+    </div>
+</div>

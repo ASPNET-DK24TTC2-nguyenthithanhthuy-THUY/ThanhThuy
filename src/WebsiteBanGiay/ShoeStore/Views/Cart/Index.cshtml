@@ -1,0 +1,238 @@
+@model List<ShoeStore.ViewModels.CartItemViewModel>
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    var subtotal = Model.Sum(item => item.Total);
+    var shippingFee = subtotal >= 500000 ? 0 : 30000;
+    var total = subtotal + shippingFee;
+}
+
+@section Styles {
+    <style>
+        .cart-item {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .cart-item-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+        }
+
+        .quantity-input {
+            width: 80px;
+            text-align: center;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 2rem;
+        }
+    </style>
+}
+
+<div class="container my-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item active">Giỏ hàng</li>
+        </ol>
+    </nav>
+
+    <h1 class="mb-4"><i class="fas fa-shopping-cart me-2"></i>Giỏ hàng của bạn</h1>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            <!-- Cart Items -->
+            <div class="col-lg-8">
+                @foreach (var item in Model)
+                {
+                    <div class="cart-item">
+                        <div class="row align-items-center">
+                            <div class="col-md-2">
+                                <img src="@(item.ProductImage ?? "https://via.placeholder.com/100")" 
+                                     alt="@item.ProductName" 
+                                     class="cart-item-image">
+                            </div>
+                            <div class="col-md-4">
+                                <h5 class="mb-2">@item.ProductName</h5>
+                                @if (!string.IsNullOrEmpty(item.Size))
+                                {
+                                    <p class="text-muted mb-1"><small>Size: <strong>@item.Size</strong></small></p>
+                                }
+                                @if (!string.IsNullOrEmpty(item.Color))
+                                {
+                                    <p class="text-muted mb-0"><small>Màu: <strong>@item.Color</strong></small></p>
+                                }
+                            </div>
+                            <div class="col-md-2">
+                                <p class="text-primary fw-bold mb-0">@item.Price.ToString("N0")đ</p>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="input-group">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" 
+                                            onclick="updateQuantity(@item.ProductId, '@item.Size', '@item.Color', @(item.Quantity - 1))">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input type="number" class="form-control quantity-input" 
+                                           value="@item.Quantity" min="1" 
+                                           onchange="updateQuantity(@item.ProductId, '@item.Size', '@item.Color', this.value)">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" 
+                                            onclick="updateQuantity(@item.ProductId, '@item.Size', '@item.Color', @(item.Quantity + 1))">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-end">
+                                <p class="h5 text-primary fw-bold mb-2">@item.Total.ToString("N0")đ</p>
+                                <form asp-action="RemoveFromCart" method="post" class="d-inline">
+                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                    <input type="hidden" name="size" value="@item.Size" />
+                                    <input type="hidden" name="color" value="@item.Color" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                            onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Clear Cart Button -->
+                <div class="text-end mt-3">
+                    <form asp-action="Clear" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-danger" 
+                                onclick="return confirm('Bạn có chắc muốn xóa toàn bộ giỏ hàng?')">
+                            <i class="fas fa-trash-alt me-2"></i>Xóa toàn bộ giỏ hàng
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <div class="summary-card">
+                    <h4 class="mb-4">Tóm tắt đơn hàng</h4>
+                    
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Tạm tính:</span>
+                        <strong>@subtotal.ToString("N0")đ</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Phí vận chuyển:</span>
+                        <strong class="@(shippingFee == 0 ? "text-success" : "")">
+                            @(shippingFee == 0 ? "Miễn phí" : shippingFee.ToString("N0") + "đ")
+                        </strong>
+                    </div>
+
+                    @if (subtotal < 500000)
+                    {
+                        <div class="alert alert-info small">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Mua thêm @((500000 - subtotal).ToString("N0"))đ để được miễn phí vận chuyển!
+                        </div>
+                    }
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between mb-4">
+                        <h5>Tổng cộng:</h5>
+                        <h5 class="text-primary">@total.ToString("N0")đ</h5>
+                    </div>
+
+                    <a asp-controller="Checkout" asp-action="Index" class="btn btn-primary w-100 btn-lg mb-2">
+                        <i class="fas fa-credit-card me-2"></i>Thanh toán
+                    </a>
+
+                    <a asp-controller="Products" asp-action="Index" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-arrow-left me-2"></i>Tiếp tục mua sắm
+                    </a>
+
+                    <!-- Features -->
+                    <div class="mt-4 pt-4 border-top">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-shield-alt fa-2x text-success me-3"></i>
+                            <div>
+                                <strong>Thanh toán an toàn</strong>
+                                <p class="small text-muted mb-0">Bảo mật thông tin</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-truck fa-2x text-primary me-3"></i>
+                            <div>
+                                <strong>Giao hàng nhanh</strong>
+                                <p class="small text-muted mb-0">2-5 ngày làm việc</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-sync-alt fa-2x text-warning me-3"></i>
+                            <div>
+                                <strong>Đổi trả dễ dàng</strong>
+                                <p class="small text-muted mb-0">Trong vòng 30 ngày</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Empty Cart -->
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-cart" style="font-size: 8rem; color: #cbd5e1;"></i>
+            <h3 class="mt-4 mb-3">Giỏ hàng của bạn đang trống</h3>
+            <p class="text-muted mb-4">Hãy thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm</p>
+            <a asp-controller="Products" asp-action="Index" class="btn btn-primary btn-lg">
+                <i class="fas fa-shopping-bag me-2"></i>Khám phá sản phẩm
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function updateQuantity(productId, size, color, quantity) {
+            if (quantity < 1) return;
+
+            $.ajax({
+                url: '@Url.Action("UpdateQuantity", "Cart")',
+                type: 'POST',
+                data: {
+                    productId: productId,
+                    size: size,
+                    color: color,
+                    quantity: quantity
+                },
+                success: function(response) {
+                    if (response.success) {
+                        location.reload();
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra. Vui lòng thử lại!');
+                }
+            });
+        }
+    </script>
+}

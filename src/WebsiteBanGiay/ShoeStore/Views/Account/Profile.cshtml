@@ -1,0 +1,75 @@
+@model ShoeStore.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i>Hồ sơ cá nhân</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-4 align-items-center">
+                        <div class="col-md-3 text-center mb-3 mb-md-0">
+                            <div class="avatar-circle bg-light text-primary rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 100px; height: 100px; font-size: 3rem;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <h3 class="fw-bold mb-1">@Model.FullName</h3>
+                            <p class="text-muted mb-2"><i class="fas fa-envelope me-2"></i>@Model.Email</p>
+                            <span class="badge bg-success rounded-pill">Thành viên</span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <h6 class="text-muted text-uppercase small fw-bold mb-3">Thông tin liên hệ</h6>
+                                <div class="mb-3">
+                                    <label class="small text-muted d-block">Số điện thoại</label>
+                                    <span class="fw-medium">@(string.IsNullOrEmpty(Model.PhoneNumber) ? "Chưa cập nhật" : Model.PhoneNumber)</span>
+                                </div>
+                                <div class="mb-0">
+                                    <label class="small text-muted d-block">Địa chỉ</label>
+                                    <span class="fw-medium">@(string.IsNullOrEmpty(Model.Address) ? "Chưa cập nhật" : Model.Address)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <h6 class="text-muted text-uppercase small fw-bold mb-3">Thông tin tài khoản</h6>
+                                <div class="mb-3">
+                                    <label class="small text-muted d-block">Ngày tham gia</label>
+                                    <span class="fw-medium">@Model.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                </div>
+                                <div class="mb-0">
+                                    <label class="small text-muted d-block">Đăng nhập lần cuối</label>
+                                    <span class="fw-medium">@(Model.LastLoginAt.HasValue ? Model.LastLoginAt.Value.ToString("dd/MM/yyyy HH:mm") : "Chưa đăng nhập")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <a asp-controller="Orders" asp-action="Index" class="btn btn-outline-primary w-100 py-2">
+                                <i class="fas fa-box-open me-2"></i>Đơn hàng của tôi
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a asp-controller="Wishlist" asp-action="Index" class="btn btn-outline-danger w-100 py-2">
+                                <i class="fas fa-heart me-2"></i>Sản phẩm yêu thích
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
